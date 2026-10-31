@@ -1,0 +1,40 @@
+
+pipeline {
+    agent any
+
+    stages {
+
+        stage('Code Checkout') {
+            steps {
+                echo 'Getting HTML project code'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh 'docker build -t my-html-app .'
+            }
+        }
+
+        stage('Deploy Application') {
+            steps {
+                sh '''
+                docker stop my-html-container || true
+                docker rm my-html-container || true
+                docker run -d --name my-html-container -p 8081:80 my-html-app
+                '''
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Website deployed successfully!'
+        }
+
+        failure {
+            echo 'Pipeline failed!'
+        }
+    }
+}
+
